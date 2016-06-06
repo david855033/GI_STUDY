@@ -43,6 +43,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Criteria.cs" />
+    <Compile Include="DataClassifier.cs" />
+    <Compile Include="DataReader.cs" />
+    <Compile Include="DataSet.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

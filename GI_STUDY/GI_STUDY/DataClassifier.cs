@@ -23,7 +23,6 @@ namespace GI_STUDY
         }
         public void classify()
         {
-            destineDataSet = new DataSet();
             destineDataSet.index = originDataSet.index;
             foreach (var row in originDataSet.dataRow)
             {
