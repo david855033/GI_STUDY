@@ -7,12 +7,11 @@ using System.Threading.Tasks;
 
 namespace GI_STUDY
 {
-    class DataReader
+    static class DataReader
     {
-        DataSet dataSet;
-        public DataReader(DataSet dataSet) { this.dataSet = dataSet; }
-        public void LoadData(string path)
+        public static DataSet LoadData(string path)
         {
+            DataSet dataSet = new DataSet();
             using (var sr = new StreamReader(path, Encoding.Default))
             {
                 string title = sr.ReadLine();
@@ -22,6 +21,7 @@ namespace GI_STUDY
                     dataSet.addDataRow(sr.ReadLine());
                 }
             }
+            return dataSet;
         }
     }
 

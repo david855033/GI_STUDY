@@ -6,28 +6,33 @@ using System.Threading.Tasks;
 
 namespace GI_STUDY
 {
-    class DataClassifier
+    class DataSelector
     {
-        List<Criteria> criteria;
+        List<Criteria> includeCriteria;
+        List<Criteria> excludeCriteria;
         DataSet originDataSet;
-        DataSet destineDataSet;
-        public DataClassifier(DataSet originDataSet, DataSet destineDataSet)
+        public DataSelector(DataSet originDataSet)
         {
-            criteria = new List<Criteria>();
+            includeCriteria = new List<Criteria>();
+            excludeCriteria = new List<Criteria>();
             this.originDataSet = originDataSet;
-            this.destineDataSet = destineDataSet;
         }
-        public void addCriteria(Criteria toAdd)
+        public void addIncludeCriteria(Criteria toAdd)
         {
-            criteria.Add(toAdd);
+            includeCriteria.Add(toAdd);
         }
-        public void classify()
+        public void addExcludeCriteria(Criteria toAdd)
         {
+            excludeCriteria.Add(toAdd);
+        }
+        public DataSet select()
+        {
+            DataSet destineDataSet = new DataSet();
             destineDataSet.index = originDataSet.index;
             foreach (var row in originDataSet.dataRow)
             {
                 bool isMatched = true;
-                foreach (var c in criteria)
+                foreach (var c in includeCriteria)
                 {
                     if (row[c.fieldIndex] != c.shouldEqual)
                     {
@@ -37,9 +42,21 @@ namespace GI_STUDY
                 }
                 if (isMatched)
                 {
+                    foreach (var c in excludeCriteria)
+                    {
+                        if (row[c.fieldIndex] == c.shouldEqual)
+                        {
+                            isMatched = false;
+                            continue;
+                        }
+                    }
+                }
+                if (isMatched)
+                {
                     destineDataSet.addDataRow(row);
                 }
             }
+            return destineDataSet;
         }
     }
 }

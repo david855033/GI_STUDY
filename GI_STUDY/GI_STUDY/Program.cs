@@ -10,24 +10,41 @@ namespace GI_STUDY
     {
         static void Main(string[] args)
         {
-            DataSet dataSet = new DataSet();
-            DataReader dataReader = new DataReader(dataSet);
-            dataReader.LoadData(@"D:\GI DATA\RawData.txt");
+            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_加入ADULT_CASESEX.txt");
 
-            DataSet studyGroup = new DataSet();
-            DataClassifier classifier = new DataClassifier(dataSet, studyGroup);
-            classifier.addCriteria(new Criteria(dataSet.getIndex("PS03"), "3"));
-            classifier.classify();
+            DataSelector removeNoAgeOrNoSex = new DataSelector(originDataSet);
+            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("CASESEX"), ""));
+            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("AGE"), "9999"));
+            DataSet dataSet_removeNoAgeOrNoSex = removeNoAgeOrNoSex.select();
 
+            DataSet dataSet_EggMilkVeg, dataSet_NormalPopulation;
+
+            DataSelector selectNormalGroup = new DataSelector(dataSet_removeNoAgeOrNoSex);
+            selectNormalGroup.addIncludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("PS03"), "1"));
+            dataSet_NormalPopulation = selectNormalGroup.select();
+
+            DataSelector selectEggMilkVeg = new DataSelector(dataSet_removeNoAgeOrNoSex);
+            selectEggMilkVeg.addIncludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("PS03"), "2"));
+            dataSet_EggMilkVeg = selectEggMilkVeg.select();
+
+            DataMatcher dataMatcher = new DataMatcher();
+            dataMatcher.addMatchKey("AGE");
+            dataMatcher.addMatchKey("CASESEX");
+            dataMatcher.setPrimaryData(dataSet_EggMilkVeg);
+            dataMatcher.setMatchData(dataSet_NormalPopulation);
+
+            List<RowMatch> matchTable = dataMatcher.doMatch();
+
+            SampleRandomizely.sampleTheMatchList(matchTable, 5);
 
             Console.WriteLine("End of Program. Press Any Key To Exit.");
             Console.ReadKey();
         }
     }
 
-   
-  
 
-  
-  
+
+
+
+
 }

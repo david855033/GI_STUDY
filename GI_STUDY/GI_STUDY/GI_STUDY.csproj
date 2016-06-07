@@ -45,10 +45,13 @@
   <ItemGroup>
     <Compile Include="Criteria.cs" />
     <Compile Include="DataClassifier.cs" />
+    <Compile Include="DataMatcher.cs" />
     <Compile Include="DataReader.cs" />
     <Compile Include="DataSet.cs" />
+    <Compile Include="MatchRandomize.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RowMatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
