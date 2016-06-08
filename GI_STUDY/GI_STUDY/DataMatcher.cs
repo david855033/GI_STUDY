@@ -8,8 +8,8 @@ namespace GI_STUDY
 {
     class DataMatcher
     {
-        List<string> matchKey;
-        List<List<string>> groupContentList;
+        public List<string> matchKey;
+        public  List<List<string>> groupContentList;
         List<RowMatchPool> rowMatchPool ;
         DataSet primaryData, matchData;
 

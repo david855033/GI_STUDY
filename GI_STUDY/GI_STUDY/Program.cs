@@ -10,6 +10,13 @@ namespace GI_STUDY
     {
         static void Main(string[] args)
         {
+            study1();   
+            Console.WriteLine("End of Program. Press Any Key To Exit.");
+            Console.ReadKey();
+        }
+        static void study1()
+        {
+            //breast feed group PS01=1, non breast feed PS01=0
             DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP.txt");
 
             DataSelector removeNoAgeOrNoSex = new DataSelector(originDataSet);
@@ -46,15 +53,18 @@ namespace GI_STUDY
 
             if (!Directory.Exists(@"D:\GI Data\result\")) { Directory.CreateDirectory(@"D:\GI Data\result\"); }
             var sw = new StreamWriter(@"D:\GI Data\result\result.txt");
+            sw.WriteLine("===Count Table===");
             sw.WriteLine(chiSquare.printResult());
+            sw.WriteLine("===Group Count===");
+            sw.WriteLine(SummarizeMatchPools.printCount(matchPools, dataMatcher));
+            sw.WriteLine();
             sw.Close();
 
-            Console.WriteLine("End of Program. Press Any Key To Exit.");
-            Console.ReadKey();
         }
+
         static void initializeGroupContent(DataMatcher dataMatcher)
         {
-            for (int i = 1; i <= 10; i++)
+            for (int i = 1; i <= 11; i++)
             {
                 for (int j = 0; j <= 1; j++)
                 {
