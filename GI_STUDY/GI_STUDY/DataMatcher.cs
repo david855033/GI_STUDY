@@ -9,13 +9,16 @@ namespace GI_STUDY
     class DataMatcher
     {
         List<string> matchKey;
-        DataSet primaryData;
-        DataSet matchData;
-        List<RowMatch> matchedRows = new List<RowMatch>();
+        List<List<string>> groupContentList;
+        List<RowMatchPool> rowMatchPool ;
+        DataSet primaryData, matchData;
+
         public DataMatcher()
         {
             matchKey = new List<string>();
+            groupContentList = new List<List<string>>();
         }
+
 
         public void setPrimaryData(DataSet primaryData)
         {
@@ -32,23 +35,43 @@ namespace GI_STUDY
             matchKey.Add(toAdd);
         }
 
-        public List<RowMatch> doMatch()
+        public void addGroupContentList(IEnumerable<string> toAdd)
         {
+            groupContentList.Add(new List<string>(toAdd));
+        }
+
+        public List<RowMatchPool> selectIntoMatchPools()
+        {
+            rowMatchPool = new List<RowMatchPool>();
+            for (int i = 0; i < groupContentList.Count;i++)
+                rowMatchPool.Add(new RowMatchPool());
+
             foreach (string[] primaryRow in primaryData.dataRow)
             {
-                List<string> matchContentPrimary = getMatchContent(matchKey, primaryRow);
-                RowMatch matchToAdd = new RowMatch() { primaryRow = primaryRow };
-                foreach (string[] matchRow in matchData.dataRow)
+                List<string> matchContentInThisRow = getMatchContent(matchKey, primaryRow);
+                for (int i = 0; i < groupContentList.Count; i++)
                 {
-                    List<string> matchContentInThisRow = getMatchContent(matchKey, matchRow);
-                    if (isTwoMatchContentEqual(matchContentPrimary, matchContentInThisRow))
+                    if (isTwoMatchContentEqual(matchContentInThisRow, groupContentList[i]))
                     {
-                        matchToAdd.matchedRows.Add(matchRow);
+                        rowMatchPool[i].primaryRows.Add(primaryRow);
+                        continue;
                     }
                 }
-                matchedRows.Add(matchToAdd);
             }
-            return matchedRows;
+
+            foreach (string[]  matchRow in matchData.dataRow)
+            {
+                List<string> matchContentInThisRow = getMatchContent(matchKey, matchRow);
+                for (int i = 0; i < groupContentList.Count; i++)
+                {
+                    if (isTwoMatchContentEqual(matchContentInThisRow, groupContentList[i]))
+                    {
+                        rowMatchPool[i].matchedRows.Add(matchRow);
+                        continue;
+                    }
+                }
+            }
+            return rowMatchPool;
         }
 
         private List<string> getMatchContent(List<string> keys, string[] row)

@@ -10,35 +10,57 @@ namespace GI_STUDY
     {
         static void Main(string[] args)
         {
-            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_加入ADULT_CASESEX.txt");
+            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP.txt");
 
             DataSelector removeNoAgeOrNoSex = new DataSelector(originDataSet);
             removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("CASESEX"), ""));
             removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("AGE"), "9999"));
             DataSet dataSet_removeNoAgeOrNoSex = removeNoAgeOrNoSex.select();
 
-            DataSet dataSet_EggMilkVeg, dataSet_NormalPopulation;
+            DataSet dataSet_StudyGroup, dataSet_NormalPopulation;
 
             DataSelector selectNormalGroup = new DataSelector(dataSet_removeNoAgeOrNoSex);
-            selectNormalGroup.addIncludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("PS03"), "1"));
+            selectNormalGroup.addExcludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("FS21"), "1"));
             dataSet_NormalPopulation = selectNormalGroup.select();
 
-            DataSelector selectEggMilkVeg = new DataSelector(dataSet_removeNoAgeOrNoSex);
-            selectEggMilkVeg.addIncludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("PS03"), "2"));
-            dataSet_EggMilkVeg = selectEggMilkVeg.select();
+            DataSelector selectStudyGroup = new DataSelector(dataSet_removeNoAgeOrNoSex);
+            selectStudyGroup.addIncludeCriteria(new Criteria(dataSet_removeNoAgeOrNoSex.getIndex("FS21"), "1"));
+            dataSet_StudyGroup = selectStudyGroup.select();
 
             DataMatcher dataMatcher = new DataMatcher();
-            dataMatcher.addMatchKey("AGE");
+            dataMatcher.addMatchKey("AGEGROUP");
             dataMatcher.addMatchKey("CASESEX");
-            dataMatcher.setPrimaryData(dataSet_EggMilkVeg);
+
+            initializeGroupContent(dataMatcher);
+
+
+            dataMatcher.setPrimaryData(dataSet_StudyGroup);
             dataMatcher.setMatchData(dataSet_NormalPopulation);
 
-            List<RowMatch> matchTable = dataMatcher.doMatch();
+            List<RowMatchPool> matchPools = dataMatcher.selectIntoMatchPools();
 
-            SampleRandomizely.sampleTheMatchList(matchTable, 5);
+            SampleRandomizely.sampleTheMatchList(matchPools, 2);
+
+            ChiSquareCalculator chiSquare = new ChiSquareCalculator(originDataSet.getIndex("PS04_2"), "1", matchPools);
+            chiSquare.calculate();
+
+            if (!Directory.Exists(@"D:\GI Data\result\")) { Directory.CreateDirectory(@"D:\GI Data\result\"); }
+            var sw = new StreamWriter(@"D:\GI Data\result\result.txt");
+            sw.WriteLine(chiSquare.printResult());
+            sw.Close();
 
             Console.WriteLine("End of Program. Press Any Key To Exit.");
             Console.ReadKey();
+        }
+        static void initializeGroupContent(DataMatcher dataMatcher)
+        {
+            for (int i = 1; i <= 10; i++)
+            {
+                for (int j = 0; j <= 1; j++)
+                {
+                    dataMatcher.addGroupContentList(new string[] { i.ToString(), j.ToString() });
+                }
+            }
         }
     }
 

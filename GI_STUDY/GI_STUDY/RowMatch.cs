@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace GI_STUDY
 {
-    class RowMatch
+    class RowMatchPool
     {
-        public string[] primaryRow;
-        public List<string[]> matchedRows=new List<string[]>();
+        public List<string[]> primaryRows = new List<string[]>();
+        public List<string[]> matchedRows = new List<string[]>();
     }
 }

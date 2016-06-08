@@ -8,19 +8,29 @@ namespace GI_STUDY
 {
     static class SampleRandomizely
     {
-        public static void sampleTheMatchList(List<RowMatch> originMatches, int pairCount)
+        public static string sampleTheMatchList(List<RowMatchPool> RowMatchPools, int pairCount)
         {
-            foreach (RowMatch rowMatch in originMatches)
+            StringBuilder result = new StringBuilder();
+            int conut = 0;
+            foreach (RowMatchPool matchPool in RowMatchPools)
             {
-                List<string[]> originMatchedRows = new List<string[]>(rowMatch.matchedRows);
+                conut++;
+                int primaryRowCount = matchPool.primaryRows.Count;
+                int targetmMatchedRowCount = primaryRowCount * pairCount;
+                
                 List<string[]> newMatchedRows = new List<string[]>();
 
-                while (newMatchedRows.Count < pairCount && originMatchedRows.Count > 0)
+                while (newMatchedRows.Count < targetmMatchedRowCount && matchPool.matchedRows.Count > 0)
                 {
-                    moveOneRandomly(originMatchedRows, newMatchedRows);
+                    moveOneRandomly(matchPool.matchedRows, newMatchedRows);
                 }
-                rowMatch.matchedRows = newMatchedRows;
+                if (newMatchedRows.Count < targetmMatchedRowCount)
+                {
+                    result.AppendLine($"Match Group {conut} has only {newMatchedRows.Count} matched data.");
+                }
+                matchPool.matchedRows = newMatchedRows;
             }
+            return result.ToString();
         }
 
         static void moveOneRandomly(List<string[]> inputRows, List<string[]> targetRows)
