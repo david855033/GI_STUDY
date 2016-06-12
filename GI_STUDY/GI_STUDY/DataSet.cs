@@ -8,15 +8,14 @@ namespace GI_STUDY
 {
     class DataSet
     {
-        public Dictionary<string, int> index;
-        public List<string[]> dataRow;
+        public Dictionary<string, int> index = new Dictionary<string, int>();
+        public List<string[]> dataRow = new List<string[]>();
         public DataSet()
         {
-            dataRow = new List<string[]>();
+           
         }
         public void setIndexFromTitle(string title)
         {
-            index = new Dictionary<string, int>();
             string[] splitline = title.Split('\t');
             for (int i = 0; i < splitline.Length; i++)
             {

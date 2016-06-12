@@ -50,19 +50,22 @@ namespace GI_STUDY
             }
         }
 
+        public static string printTitle()
+        {
+            return "\t(+)\t%\t(-)\t%\tTotal"; 
+        }
         public string printResult()
         {
             StringBuilder result = new StringBuilder();
             group sum = new group() { Postive = primaryGroup.Postive + matchedGroup.Postive, Negative = primaryGroup.Negative + matchedGroup.Negative };
-            result.AppendLine("\t(+)\t%\t(-)\t%\tTotal");
-            result.AppendLine(getGroupResult(primaryGroup));
-            result.AppendLine(getGroupResult(matchedGroup));
-            result.AppendLine(getGroupResult(sum));
+            result.AppendLine("Prm_Grp" + getGroupResult(primaryGroup));
+            result.AppendLine("Mch_Grp" + getGroupResult(matchedGroup));
+            result.AppendLine("total" + getGroupResult(sum));
             return result.ToString(); ;
         }
         string getGroupResult(group g)
         {
-            return $"Primary\t{g.Postive}\t{g.PosPer}\t{g.Negative}\t{g.NegPer}\t{g.Total}";
+            return $"\t{g.Postive}\t{g.PosPer}\t{g.Negative}\t{g.NegPer}\t{g.Total}";
         }
 
 

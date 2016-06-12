@@ -40,7 +40,7 @@ namespace GI_STUDY
             groupContentList.Add(new List<string>(toAdd));
         }
 
-        public List<RowMatchPool> selectIntoMatchPools()
+        public List<RowMatchPool> matchIntoPools()
         {
             rowMatchPool = new List<RowMatchPool>();
             for (int i = 0; i < groupContentList.Count;i++)

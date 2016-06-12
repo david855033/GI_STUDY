@@ -11,6 +11,7 @@ namespace GI_STUDY
     {
         public static DataSet LoadData(string path)
         {
+            Console.WriteLine($"Loading data from {path}");
             DataSet dataSet = new DataSet();
             using (var sr = new StreamReader(path, Encoding.Default))
             {
