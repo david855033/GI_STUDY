@@ -52,7 +52,7 @@ namespace GI_STUDY
 
         public static string printTitle()
         {
-            return "\t(+)\t%\t(-)\t%\tTotal"; 
+            return "\t(+)\t%\t(-)\t%\tTotal";
         }
         public string printResult()
         {
@@ -61,6 +61,19 @@ namespace GI_STUDY
             result.AppendLine("Prm_Grp" + getGroupResult(primaryGroup));
             result.AppendLine("Mch_Grp" + getGroupResult(matchedGroup));
             result.AppendLine("total" + getGroupResult(sum));
+
+            const double ChiCritical = 3.841;
+            double primaryGroupPositiveExpect = ((double)primaryGroup.Postive + primaryGroup.Negative) * sum.Postive / (sum.Postive + sum.Negative);
+            double primaryGroupNegativeExpect = ((double)primaryGroup.Postive + primaryGroup.Negative) * sum.Negative / (sum.Postive + sum.Negative);
+            double matchGroupPositiveExpect = ((double)matchedGroup.Postive + matchedGroup.Negative) * sum.Postive / (sum.Postive + sum.Negative);
+            double matchGroupNegativeExpect = ((double)matchedGroup.Postive + matchedGroup.Negative) * sum.Negative / (sum.Postive + sum.Negative);
+            double ChiValue = Math.Pow(primaryGroupPositiveExpect - primaryGroup.Postive, 2) / primaryGroupPositiveExpect
+                + Math.Pow(primaryGroupPositiveExpect - primaryGroup.Postive, 2) / primaryGroupPositiveExpect
+                + Math.Pow(primaryGroupPositiveExpect - primaryGroup.Postive, 2) / primaryGroupPositiveExpect
+                + Math.Pow(primaryGroupPositiveExpect - primaryGroup.Postive, 2) / primaryGroupPositiveExpect;
+
+            result.AppendLine($"Chi Value = {Math.Round(ChiValue,3)}, Critical Chi = {Math.Round(ChiCritical,3)}, Significant = {ChiValue > ChiCritical}");
+
             return result.ToString(); ;
         }
         string getGroupResult(group g)

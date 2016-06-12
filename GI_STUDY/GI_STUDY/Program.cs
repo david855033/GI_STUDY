@@ -78,13 +78,19 @@ namespace GI_STUDY
 
 
             string result = "";
-            result = MatchAndCalculateChiSquare("NonBreastMilk vs BreastMilk on PS04", 5, dataSet_NonBreastMilk, dataSet_BreastMilk, 1, "PS04", "1", result);
+            result = MatchAndCalculateChiSquare("NonBreastMilk vs BreastMilk on PS04", 100, dataSet_NonBreastMilk, dataSet_BreastMilk, 1, "PS04", "1", result);
 
             if (!Directory.Exists(@"D:\GI Data\result\")) { Directory.CreateDirectory(@"D:\GI Data\result\"); }
             var sw = new StreamWriter(@"D:\GI Data\result\result.txt");
             sw.Write(result);
             sw.Close();
         }
+
+
+
+
+
+
         static string MatchAndCalculateChiSquare(string name, int repeat, DataSet Primary, DataSet Match, int matchCount,
             string CalculateField, string fieldPostiveCriteria, string Result)
         {
@@ -106,8 +112,13 @@ namespace GI_STUDY
                 result.AppendLine(ChiSquareCalculator.printTitle());
                 result.Append(chiSquare.printResult());
                 result.AppendLine("");
+                if (i == repeat-1)
+                {
+                    result.AppendLine("Match Detail");
+                    result.Append(SummarizeMatchPools.printCount(matchPools, dataMatcher));
+                    result.AppendLine("");
+                }
             }
-
             return result.ToString();
         }
         static void initializeGroupContent(DataMatcher dataMatcher)
