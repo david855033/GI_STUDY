@@ -8,6 +8,7 @@ namespace GI_STUDY
 {
     static class SampleRandomizely
     {
+        static Random random = new Random();
         public static string sampleTheMatchList(List<RowMatchPool> RowMatchPools, int pairCount)
         {
             StringBuilder result = new StringBuilder();
@@ -35,7 +36,6 @@ namespace GI_STUDY
 
         static void moveOneRandomly(List<string[]> inputRows, List<string[]> targetRows)
         {
-            Random random = new Random();
             int randomIndex = random.Next(inputRows.Count());
             targetRows.Add(inputRows[randomIndex]);
             inputRows.RemoveAt(randomIndex);

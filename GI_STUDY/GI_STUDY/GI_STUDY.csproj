@@ -51,6 +51,7 @@
     <Compile Include="DataReader.cs" />
     <Compile Include="DataSet.cs" />
     <Compile Include="MatchRandomize.cs" />
+    <Compile Include="OddsRatioTable.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RowMatch.cs" />
