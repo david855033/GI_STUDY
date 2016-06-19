@@ -6,14 +6,9 @@ using System.Threading.Tasks;
 
 namespace GI_STUDY
 {
-    class DataJoiner
+    static class DataJoiner
     {
-        DataSet originDataSet;
-        public DataJoiner(DataSet originDataSet)
-        {
-            this.originDataSet = originDataSet;
-        }
-        public DataSet joinData(DataSet joinDataSet)
+        static public DataSet joinData(this DataSet originDataSet, DataSet joinDataSet)
         {
             DataSet destineDataSet = new DataSet();
             foreach (var i in joinDataSet.index)

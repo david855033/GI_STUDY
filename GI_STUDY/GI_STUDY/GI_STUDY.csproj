@@ -50,6 +50,7 @@
     <Compile Include="DataMatcher.cs" />
     <Compile Include="DataReader.cs" />
     <Compile Include="DataSet.cs" />
+    <Compile Include="FieldNameToTest.cs" />
     <Compile Include="MatchRandomize.cs" />
     <Compile Include="OddsRatioTable.cs" />
     <Compile Include="Program.cs" />

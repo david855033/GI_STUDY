@@ -6,48 +6,41 @@ using System.Threading.Tasks;
 
 namespace GI_STUDY
 {
-    class DataSelector
+    static class DataSelector
     {
-        List<Criteria> includeCriteria;
-        List<Criteria> excludeCriteria;
-        DataSet originDataSet;
-        public DataSelector(DataSet originDataSet)
-        {
-            includeCriteria = new List<Criteria>();
-            excludeCriteria = new List<Criteria>();
-            this.originDataSet = originDataSet;
-        }
-        public void addIncludeCriteria(Criteria toAdd)
-        {
-            includeCriteria.Add(toAdd);
-        }
-        public void addExcludeCriteria(Criteria toAdd)
-        {
-            excludeCriteria.Add(toAdd);
-        }
-        public DataSet select()
+        public static DataSet select(this DataSet originDataSet, List<Criteria> includeCriteria, List<Criteria> excludeCriteria)
         {
             DataSet destineDataSet = new DataSet();
             destineDataSet.index = originDataSet.index;
             foreach (var row in originDataSet.dataRow)
             {
-                bool isMatched = true;
-                foreach (var c in includeCriteria)
+                bool isMatched = false;
+                if (includeCriteria != null)
                 {
-                    if (row[c.fieldIndex] != c.shouldEqual)
-                    {
-                        isMatched = false;
-                        continue;
-                    }
-                }
-                if (isMatched)
-                {
-                    foreach (var c in excludeCriteria)
+                    foreach (var c in includeCriteria)
                     {
                         if (row[c.fieldIndex] == c.shouldEqual)
                         {
-                            isMatched = false;
+                            isMatched = true;
                             continue;
+                        }
+                    }
+                }
+                else
+                {
+                    isMatched = true;
+                }
+                if (isMatched)
+                {
+                    if (excludeCriteria != null)
+                    {
+                        foreach (var c in excludeCriteria)
+                        {
+                            if (row[c.fieldIndex] == c.shouldEqual)
+                            {
+                                isMatched = false;
+                                continue;
+                            }
                         }
                     }
                 }

@@ -8,300 +8,144 @@ namespace GI_STUDY
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             //study_BreastFeeding_Atopic();
-            study_BreastFeeding_Atopic2();
+            FileStream filestream = new FileStream(@"D:\GI DATA\out.txt", FileMode.Append);
+            var streamwriter = new StreamWriter(filestream);
+            streamwriter.AutoFlush = true;
+            Console.SetOut(streamwriter);
+            Console.SetError(streamwriter);
+            Console.WriteLine($"Execution log======================{DateTime.Now}");
+            study();
             Console.WriteLine(".");
             Console.WriteLine(".");
             Console.WriteLine(".");
             Console.WriteLine("End of Program. Press Any Key To Exit.");
-            Console.ReadKey();
         }
-        static void study_BreastFeeding_Atopic2()
+        static string basefolder;
+        static int repeat;
+        static void study()
         {
             //breast feed group PS01=1, non breast feed PS01=0
             DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
             showDataCount(originDataSet);
+            Criteria.index = originDataSet.index;
 
             Console.WriteLine("remove data without CASESEX and AGE data...");
-            DataSelector removeNoAgeOrNoSex = new DataSelector(originDataSet);
-            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("CASESEX"), ""));
-            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("AGE"), "9999"));
-            DataSet dataSet_removeNoAgeOrNoSex = removeNoAgeOrNoSex.select();
+            List<Criteria> BadData_toExclude = new List<Criteria>()  {
+                new Criteria("CASESEX", "") ,
+                new Criteria("AGE", "9999")
+            };
+            DataSet dataSet_removeNoAgeOrNoSex = originDataSet.select(null, BadData_toExclude);
             showDataCount(dataSet_removeNoAgeOrNoSex);
 
-
-            Console.WriteLine("select children (AGEGROUP 1-6) ...");
-            DataSet ChildrenGroup = new DataSet();
-            DataSelector[] selectAgeGroup = new DataSelector[7];
+            Console.WriteLine("select Children...");
+            DataSet DataSets_Children = new DataSet();
             for (int i = 0; i < 7; i++)
             {
-                selectAgeGroup[i] = new DataSelector(dataSet_removeNoAgeOrNoSex);
-                selectAgeGroup[i].addIncludeCriteria(new Criteria(originDataSet.getIndex("AGEGROUP"), (i + 1).ToString()));
-                ChildrenGroup = new DataJoiner(ChildrenGroup).joinData(selectAgeGroup[i].select());
+                List<Criteria> toInclude = new List<Criteria>() {
+                    new Criteria("AGEGROUP", (i + 1).ToString())
+                };
+                DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(toInclude, null));
             }
-            showDataCount(ChildrenGroup);
+            showDataCount(DataSets_Children);
 
-            Console.WriteLine("select children (AGEGROUP 1-6) ...");
-            DataSet SmallChildrenGroup = new DataSet();
-            DataSelector[] SmallselectAgeGroup = new DataSelector[3];
-            for (int i = 0; i < 3; i++)
+            List<Criteria> Vegetarian_toInclude = new List<Criteria>()  {
+                new Criteria("PS03", "2") ,
+                new Criteria("PS03", "3") ,
+                new Criteria("PS03", "4") ,
+                new Criteria("PS03", "5")
+            };
+            List<Criteria> non_Vegetarian_toInclude = new List<Criteria>()  {
+                new Criteria("PS03", "1")
+            };
+
+            Console.WriteLine("select Vegetarian...");
+            DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
+            showDataCount(dataSet_vegetarian);
+
+            Console.WriteLine("select non-Vegetarian...");
+            DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
+            showDataCount(dataSet_non_vegetarian);
+
+            DataSet[] dataSet_vegetarian_byAge = new DataSet[7];
+            for (int i = 0; i < 7; i++)
             {
-                SmallselectAgeGroup[i] = new DataSelector(dataSet_removeNoAgeOrNoSex);
-                SmallselectAgeGroup[i].addIncludeCriteria(new Criteria(originDataSet.getIndex("AGEGROUP"), (i + 1).ToString()));
-                SmallChildrenGroup = new DataJoiner(SmallChildrenGroup).joinData(SmallselectAgeGroup[i].select());
+                Console.WriteLine($"select Vegetarian. age group{i + 1}");
+                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + 1).ToString()) }, null);
+                showDataCount(dataSet_vegetarian_byAge[i]);
             }
-            showDataCount(SmallChildrenGroup);
 
-            Console.WriteLine("select children (AGEGROUP 1-6) ...");
-            DataSet OldChildrenGroup = new DataSet();
-            DataSelector[] OldselectAgeGroup = new DataSelector[4];
-            for (int i = 0; i < 4; i++)
+            DataSet[] dataSet_non_vegetarian_byAge = new DataSet[7];
+            for (int i = 0; i < 7; i++)
             {
-                OldselectAgeGroup[i] = new DataSelector(dataSet_removeNoAgeOrNoSex);
-                OldselectAgeGroup[i].addIncludeCriteria(new Criteria(originDataSet.getIndex("AGEGROUP"), (i + 3).ToString()));
-                OldChildrenGroup = new DataJoiner(OldChildrenGroup).joinData(OldselectAgeGroup[i].select());
+                Console.WriteLine($"select non-Vegetarian. age group{i + 1}");
+                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + 1).ToString()) }, null);
+                showDataCount(dataSet_non_vegetarian_byAge[i]);
             }
-            showDataCount(OldChildrenGroup);
 
+            initializeTestList();
 
-
-            DataSet dataSet_EggMilk_Allergy_small, dataSet_NonAllergy_small ;
-
-            Console.WriteLine("Select dataSet_EggMilk_Allergy");
-            DataSelector selectStudyGroupSmall = new DataSelector(SmallChildrenGroup);
-            selectStudyGroupSmall.addIncludeCriteria(new Criteria(originDataSet.getIndex("PS03"), "2"));
-            dataSet_EggMilk_Allergy_small = selectStudyGroupSmall.select();
-            showDataCount(dataSet_EggMilk_Allergy_small);
-
-            Console.WriteLine("Select dataSet_EggMilk_Allergy");
-            DataSelector selectControlGroupSmall= new DataSelector(SmallChildrenGroup);
-            selectControlGroupSmall.addExcludeCriteria(new Criteria(originDataSet.getIndex("PS03"), "2"));
-            dataSet_NonAllergy_small = selectControlGroupSmall.select();
-            showDataCount(dataSet_NonAllergy_small);
-
-
-            DataSet dataSet_EggMilk_Allergy_old, dataSet_NonAllergy_old;
-
-            Console.WriteLine("Select dataSet_EggMilk_Allergy");
-            DataSelector selectStudyGroupOld = new DataSelector(OldChildrenGroup);
-            selectStudyGroupOld.addIncludeCriteria(new Criteria(originDataSet.getIndex("PS03"), "2"));
-            dataSet_EggMilk_Allergy_old = selectStudyGroupOld.select();
-            showDataCount(dataSet_EggMilk_Allergy_old);
-
-            Console.WriteLine("Select dataSet_EggMilk_Allergy");
-            DataSelector selectControlGroupOld = new DataSelector(OldChildrenGroup);
-            selectControlGroupOld.addExcludeCriteria(new Criteria(originDataSet.getIndex("PS03"), "2"));
-            dataSet_NonAllergy_old = selectControlGroupOld.select();
-            showDataCount(dataSet_NonAllergy_old);
-
-
-            string result = ""; string studyGroup;
-            string folder;
-            string fieldname, info;
-            int repeat = 100, matchcount = 4;
-            DataSet primary, match;
+            repeat = 100;
+            basefolder = $@"D:\GI Data\result\";
             OddsRatioTable.clear();
-            OddsRatioTable.setPath($@"D:\GI Data\result Egg Milk small old\Odd Ratio Table.txt");
-            studyGroup = "EggMilk_Veg vs NonEggMilk_Veg";
-            folder = $@"D:\GI Data\result Egg Milk small old\{studyGroup}";
-            primary = dataSet_EggMilk_Allergy_old; match = dataSet_NonAllergy_old;
+            OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table.txt");
 
-            fieldname = "PS04"; info = "是否曾有其他過敏性疾病";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_1"; info = "過敏性鼻炎";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_2"; info = "氣喘";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_3"; info = "異位性皮膚炎";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_4"; info = "蕁麻疹";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "FS01"; info = "是否可能發生過食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "FS05"; info = "是否知道對何種食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}？).txt");
-            fieldname = "FS21"; info = "請問是否曾求醫，檢查確定是上述食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, matchcount, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
+            DoTestAndWriteResult(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
+
+            for (int i = 0; i < 7; i++)
+            {
+                DoTestAndWriteResult(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
+            }
 
             OddsRatioTable.writeToFile();
+
+
         }
-
-
-
-
-        static void study_BreastFeeding_Atopic()
+        static void DoTestAndWriteResult(DataSet primary, DataSet match, string studyGroup)
         {
-            //breast feed group PS01=1, non breast feed PS01=0
-            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
-            showDataCount(originDataSet);
-
-            Console.WriteLine("remove data without CASESEX and AGE data...");
-            DataSelector removeNoAgeOrNoSex = new DataSelector(originDataSet);
-            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("CASESEX"), ""));
-            removeNoAgeOrNoSex.addExcludeCriteria(new Criteria(originDataSet.getIndex("AGE"), "9999"));
-            DataSet dataSet_removeNoAgeOrNoSex = removeNoAgeOrNoSex.select();
-            showDataCount(dataSet_removeNoAgeOrNoSex);
-
-            Console.WriteLine("select children (AGEGROUP 1-6) ...");
-            DataSet ChildrenGroup = new DataSet();
-            DataSelector[] selectAgeGroup = new DataSelector[7];
-            for (int i = 0; i < 7; i++)
+            foreach (var fieldnameSet in testList)
             {
-                selectAgeGroup[i] = new DataSelector(dataSet_removeNoAgeOrNoSex);
-                selectAgeGroup[i].addIncludeCriteria(new Criteria(originDataSet.getIndex("AGEGROUP"), (i + 1).ToString()));
-                ChildrenGroup = new DataJoiner(ChildrenGroup).joinData(selectAgeGroup[i].select());
+                DoTestAndWriteResult(fieldnameSet, primary, match, studyGroup);
             }
-            showDataCount(ChildrenGroup);
-
-
-            DataSet dataSet_BreastMilk, dataSet_NonBreastMilk;
-
-            Console.WriteLine("Select Breast Feed Group: (PS01 = 1)...");
-            DataSelector selectStudyGroup = new DataSelector(ChildrenGroup);
-            selectStudyGroup.addIncludeCriteria(new Criteria(originDataSet.getIndex("PS01"), "1"));
-            dataSet_BreastMilk = selectStudyGroup.select();
-            showDataCount(dataSet_BreastMilk);
-
-            DataSet[] dataSet_subgroup_Pure_Breast_Feeding = new DataSet[6];
-            initializeDataSetArray(dataSet_subgroup_Pure_Breast_Feeding);
-            for (int i = 0; i < dataSet_subgroup_Pure_Breast_Feeding.Length; i++)
-            {
-                Console.WriteLine($"Select subgroup - pure breast{i + 1}");
-                DataSelector selectSubGroup = new DataSelector(dataSet_BreastMilk);
-                selectSubGroup.addIncludeCriteria(new Criteria(originDataSet.getIndex("BREAST_PURE_GROUP"), (i + 1).ToString()));
-                dataSet_subgroup_Pure_Breast_Feeding[i] = selectSubGroup.select();
-                showDataCount(dataSet_subgroup_Pure_Breast_Feeding[i]);
-            }
-
-            DataSet[] dataSet_subgroup_Partial_Breast_Feeding = new DataSet[6];
-            initializeDataSetArray(dataSet_subgroup_Partial_Breast_Feeding);
-            for (int i = 0; i < dataSet_subgroup_Partial_Breast_Feeding.Length; i++)
-            {
-                Console.WriteLine($"Select subgroup - partial breast{i + 1}");
-                DataSelector selectSubGroup = new DataSelector(dataSet_BreastMilk);
-                selectSubGroup.addIncludeCriteria(new Criteria(originDataSet.getIndex("BREAST_PARTIAL_GROUP"), (i + 1).ToString()));
-                dataSet_subgroup_Partial_Breast_Feeding[i] = selectSubGroup.select();
-                showDataCount(dataSet_subgroup_Partial_Breast_Feeding[i]);
-            }
-
-            Console.WriteLine("Select Non-Breast Feed Group: (PS01 = 0)...");
-            DataSelector selectNormalGroup = new DataSelector(ChildrenGroup);
-            selectNormalGroup.addIncludeCriteria(new Criteria(originDataSet.getIndex("PS01"), "0"));
-            dataSet_NonBreastMilk = selectNormalGroup.select();
-            showDataCount(dataSet_NonBreastMilk);
-
-            string result = ""; string studyGroup;
-            string folder;
-            string fieldname, info;
-            int repeat = 5;
-            DataSet primary, match;
-            OddsRatioTable.clear();
-            OddsRatioTable.setPath($@"D:\GI Data\result\Odd Ratio Table.txt");
-            studyGroup = "NonBreastMilk vs BreastMilk";
-            folder = $@"D:\GI Data\result\{studyGroup}";
-            primary = dataSet_NonBreastMilk; match = dataSet_BreastMilk;
-
-            fieldname = "PS04"; info = "是否曾有其他過敏性疾病";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_1"; info = "過敏性鼻炎";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_2"; info = "氣喘";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_3"; info = "異位性皮膚炎";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "PS04_4"; info = "蕁麻疹";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "FS01"; info = "是否可能發生過食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-            fieldname = "FS05"; info = "是否知道對何種食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}？).txt");
-            fieldname = "FS21"; info = "請問是否曾求醫，檢查確定是上述食物過敏";
-            result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-            writeResult(result, folder, $"{fieldname}({info}).txt");
-
-            for (int i = 0; i < 6; i++)
-            {
-                studyGroup = $"Pure Breast Feeding Group{(i + 1).ToString()} vs Non Breast Feeding";
-                folder = $@"D:\GI Data\result\{studyGroup} ";
-                primary = dataSet_subgroup_Pure_Breast_Feeding[i]; match = dataSet_NonBreastMilk;
-
-                fieldname = "PS04"; info = "是否曾有其他過敏性疾病";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_1"; info = "過敏性鼻炎";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_2"; info = "氣喘";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_3"; info = "異位性皮膚炎";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_4"; info = "蕁麻疹";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "FS01"; info = "是否可能發生過食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "FS05"; info = "是否知道對何種食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}？).txt");
-                fieldname = "FS21"; info = "請問是否曾求醫，檢查確定是上述食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-            }
-
-            for (int i = 0; i < 6; i++)
-            {
-                studyGroup = $"Partial Breast Feeding Group{(i + 1).ToString()} vs Non Breast Feeding";
-                folder = $@"D:\GI Data\result\{studyGroup} ";
-                primary = dataSet_subgroup_Partial_Breast_Feeding[i]; match = dataSet_NonBreastMilk;
-
-                fieldname = "PS04"; info = "是否曾有其他過敏性疾病";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_1"; info = "過敏性鼻炎";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_2"; info = "氣喘";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_3"; info = "異位性皮膚炎";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "PS04_4"; info = "蕁麻疹";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "FS01"; info = "是否可能發生過食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-                fieldname = "FS05"; info = "是否知道對何種食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}？).txt");
-                fieldname = "FS21"; info = "請問是否曾求醫，檢查確定是上述食物過敏";
-                result = MatchAndCalculateChiSquare($"{studyGroup} on {fieldname}", repeat, primary, match, 1, fieldname, "1");
-                writeResult(result, folder, $"{fieldname}({info}).txt");
-            }
-            OddsRatioTable.writeToFile();
         }
-
+        static void DoTestAndWriteResult(FieldNameToTest fieldnameSet, DataSet primary, DataSet match, string studyGroup)
+        {
+            int matchcount = 1;
+            if (match.dataRow.Count / primary.dataRow.Count > 12)
+            {
+                matchcount = 10;
+            }
+            else
+            if (match.dataRow.Count / primary.dataRow.Count > 5)
+            {
+                matchcount = 4;
+            }
+            else
+            if (match.dataRow.Count / primary.dataRow.Count > 3)
+            {
+                matchcount = 2;
+            }
+            
+            var s = MatchAndCalculateChiSquare($"{studyGroup} on {fieldnameSet.fieldname}", repeat, primary, match, matchcount, fieldnameSet.fieldname, fieldnameSet.positiveValue);
+            string folder = basefolder + $@"\{studyGroup}";
+            writeResult(s, folder, $"{fieldnameSet.fieldname}({fieldnameSet.info}).txt");
+        }
+        static List<FieldNameToTest> testList;
+        static void initializeTestList()
+        {
+            testList = new List<FieldNameToTest>();
+            testList.Add(new FieldNameToTest("PS04", "1", "是否曾有其他過敏性疾病"));
+            testList.Add(new FieldNameToTest("PS04_1", "1", "過敏性鼻炎"));
+            testList.Add(new FieldNameToTest("PS04_2", "1", "氣喘"));
+            testList.Add(new FieldNameToTest("PS04_3", "1", "異位性皮膚炎"));
+            testList.Add(new FieldNameToTest("PS04_4", "1", "蕁麻疹"));
+            testList.Add(new FieldNameToTest("FS01", "1", "是否可能發生過食物過敏"));
+            testList.Add(new FieldNameToTest("FS05", "1", "是否知道對何種食物過敏"));
+            testList.Add(new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏"));
+        }
 
         static void writeResult(string result, string folder, string filename)
         {
@@ -323,6 +167,7 @@ namespace GI_STUDY
         {
             StringBuilder result = new StringBuilder(Result);
             int primaryMore = 0, matchMore = 0;
+            int succussefulMatch = 0;
             for (int i = 0; i < repeat; i++)
             {
                 DataMatcher dataMatcher = new DataMatcher();
@@ -339,6 +184,7 @@ namespace GI_STUDY
                 result.AppendLine(ChiSquareCalculator.printTitle());
                 result.Append(chiSquare.printResult(ref primaryMore, ref matchMore, name));
                 result.AppendLine("");
+                if (Primary.dataRow.Count * repeat >= Match.dataRow.Count) succussefulMatch++;
                 if (i == repeat - 1)
                 {
                     result.AppendLine("Match Detail");
@@ -348,7 +194,8 @@ namespace GI_STUDY
             }
             Console.WriteLine($"calculate Chi square table {name} for {repeat} times");
             string summary = $"Significant result: Primary > Matched:{primaryMore},  Matched > Primary:{matchMore}, Non-Significant:{repeat - primaryMore - matchMore}";
-            return name + "\r\n" + summary + "\r\n" + result.ToString();
+            string summary2 = ($"[match raito] 1:{matchCount}, success matching = {Math.Round(((double)succussefulMatch * 100 / repeat), 1)}%");
+            return name + "\r\n" + summary + "\r\n" + summary2 + "\r\n" + result.ToString();
         }
         static void initializeGroupContent(DataMatcher dataMatcher)
         {
@@ -362,7 +209,14 @@ namespace GI_STUDY
         }
         static void showDataCount(DataSet input)
         {
-            Console.WriteLine($">>data count: {input.dataRow.Count}");
+            int M = (from q in input.dataRow
+                     where q[input.getIndex("CASESEX")] == "1"
+                     select q).Count();
+            int F = (from q in input.dataRow
+                     where q[input.getIndex("CASESEX")] == "0"
+                     select q).Count();
+
+            Console.WriteLine($">>data count: {input.dataRow.Count}  M:{M } F:{F}");
         }
         static void initializeDataSetArray(DataSet[] array)
         {
