@@ -20,7 +20,7 @@ namespace GI_STUDY
                 string line = (i + 1).ToString();
                 int primaryFemaleCount = rowMatchPools[i * 2].primaryRows.Count;
                 int matchFemaleCount = rowMatchPools[i * 2].matchedRows.Count;
-                int primaryMaleCount = rowMatchPools[i * 2 + 1].matchedRows.Count;
+                int primaryMaleCount = rowMatchPools[i * 2 + 1].primaryRows.Count;
                 int matchMaleCount = rowMatchPools[i * 2 + 1].matchedRows.Count;
                 int primaryTotalCount = primaryFemaleCount + primaryMaleCount;
                 int matchTotalCount = matchFemaleCount + matchMaleCount;

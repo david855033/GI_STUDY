@@ -43,10 +43,10 @@ namespace GI_STUDY
 
             Console.WriteLine("select Children...");
             DataSet DataSets_Children = new DataSet();
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < 4; i++)
             {
                 List<Criteria> toInclude = new List<Criteria>() {
-                    new Criteria("AGEGROUP", (i + 1).ToString())
+                    new Criteria("AGEGROUP", (i + 8).ToString())
                 };
                 DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(toInclude, null));
             }
@@ -62,6 +62,10 @@ namespace GI_STUDY
                 new Criteria("PS03", "1")
             };
 
+            List<Criteria> DoctorFoodAllergy_toInclude = new List<Criteria>()  {
+                new Criteria("FS21", "1")
+            };
+
             Console.WriteLine("select Vegetarian...");
             DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
             showDataCount(dataSet_vegetarian);
@@ -70,19 +74,21 @@ namespace GI_STUDY
             DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
             showDataCount(dataSet_non_vegetarian);
 
-            DataSet[] dataSet_vegetarian_byAge = new DataSet[7];
-            for (int i = 0; i < 7; i++)
+            int agegroups =4;
+            int firstAgeGroup = 8;
+            DataSet[] dataSet_vegetarian_byAge = new DataSet[agegroups];
+            for (int i = 0; i < agegroups; i++)
             {
                 Console.WriteLine($"select Vegetarian. age group{i + 1}");
-                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + 1).ToString()) }, null);
+                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + firstAgeGroup).ToString()) }, null);
                 showDataCount(dataSet_vegetarian_byAge[i]);
             }
 
-            DataSet[] dataSet_non_vegetarian_byAge = new DataSet[7];
-            for (int i = 0; i < 7; i++)
+            DataSet[] dataSet_non_vegetarian_byAge = new DataSet[agegroups];
+            for (int i = 0; i < agegroups; i++)
             {
                 Console.WriteLine($"select non-Vegetarian. age group{i + 1}");
-                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + 1).ToString()) }, null);
+                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + firstAgeGroup).ToString()) }, null);
                 showDataCount(dataSet_non_vegetarian_byAge[i]);
             }
 
@@ -95,7 +101,7 @@ namespace GI_STUDY
 
             DoTestAndWriteResult(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
 
-            for (int i = 0; i < 7; i++)
+            for (int i = 0; i < dataSet_vegetarian_byAge.Length; i++)
             {
                 DoTestAndWriteResult(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
             }
@@ -145,6 +151,8 @@ namespace GI_STUDY
             testList.Add(new FieldNameToTest("FS01", "1", "是否可能發生過食物過敏"));
             testList.Add(new FieldNameToTest("FS05", "1", "是否知道對何種食物過敏"));
             testList.Add(new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏"));
+            testList.Add(new FieldNameToTest("FS13", "1", "對蛋過敏"));
+            testList.Add(new FieldNameToTest("FS15", "1", "對奶過敏"));
         }
 
         static void writeResult(string result, string folder, string filename)
