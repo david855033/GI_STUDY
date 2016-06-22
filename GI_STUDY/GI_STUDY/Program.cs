@@ -12,7 +12,7 @@ namespace GI_STUDY
         static void Main(string[] args)
         {
             //study_BreastFeeding_Atopic();
-            FileStream filestream = new FileStream(@"D:\GI DATA\out.txt", FileMode.Append);
+            FileStream filestream = new FileStream(@"D:\GI DATA\out.txt", FileMode.Create);
             var streamwriter = new StreamWriter(filestream);
             streamwriter.AutoFlush = true;
             Console.SetOut(streamwriter);
@@ -32,6 +32,7 @@ namespace GI_STUDY
             DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
             showDataCount(originDataSet);
             Criteria.index = originDataSet.index;
+            FieldNameToTest.index = originDataSet.index;
 
             Console.WriteLine("remove data without CASESEX and AGE data...");
             List<Criteria> BadData_toExclude = new List<Criteria>()  {
@@ -43,12 +44,12 @@ namespace GI_STUDY
 
             Console.WriteLine("select Children...");
             DataSet DataSets_Children = new DataSet();
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < 7; i++)
             {
-                List<Criteria> toInclude = new List<Criteria>() {
-                    new Criteria("AGEGROUP", (i + 8).ToString())
+                List<Criteria> ageGroupToInclude = new List<Criteria>() {
+                    new Criteria("AGEGROUP", (i + 1).ToString())
                 };
-                DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(toInclude, null));
+                DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(ageGroupToInclude, null));
             }
             showDataCount(DataSets_Children);
 
@@ -58,6 +59,43 @@ namespace GI_STUDY
                 new Criteria("PS03", "4") ,
                 new Criteria("PS03", "5")
             };
+
+            DataSet dataSet_forCount;
+
+            List<Criteria> EggMilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "2")
+            };
+            Console.WriteLine("select EggMilkVeg...");
+            dataSet_forCount = DataSets_Children.select(EggMilkVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> EggVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "3")
+            };
+            Console.WriteLine("select EggVeg...");
+            dataSet_forCount = DataSets_Children.select(EggVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
+            List<Criteria> MilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "4")
+            };
+            Console.WriteLine("select MilkVeg...");
+            dataSet_forCount = DataSets_Children.select(MilkVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> AllVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "5")
+            };
+            Console.WriteLine("select AllVeg...");
+            dataSet_forCount = DataSets_Children.select(AllVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
             List<Criteria> non_Vegetarian_toInclude = new List<Criteria>()  {
                 new Criteria("PS03", "1")
             };
@@ -74,50 +112,52 @@ namespace GI_STUDY
             DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
             showDataCount(dataSet_non_vegetarian);
 
-            int agegroups =4;
-            int firstAgeGroup = 8;
+            int agegroups = 7;
+            int firstAgeGroup = 1;
             DataSet[] dataSet_vegetarian_byAge = new DataSet[agegroups];
-            for (int i = 0; i < agegroups; i++)
-            {
-                Console.WriteLine($"select Vegetarian. age group{i + 1}");
-                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + firstAgeGroup).ToString()) }, null);
-                showDataCount(dataSet_vegetarian_byAge[i]);
-            }
-
             DataSet[] dataSet_non_vegetarian_byAge = new DataSet[agegroups];
             for (int i = 0; i < agegroups; i++)
             {
+                var AgeToInclude = new List<Criteria>()
+                {
+                    new Criteria("AGEGROUP", (i + firstAgeGroup).ToString())
+                };
+
+                Console.WriteLine($"select Vegetarian. age group{i + 1}");
+                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(AgeToInclude, null);
+                showDataCount(dataSet_vegetarian_byAge[i]);
+
                 Console.WriteLine($"select non-Vegetarian. age group{i + 1}");
-                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(new List<Criteria>() { new Criteria("AGEGROUP", (i + firstAgeGroup).ToString()) }, null);
+                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(AgeToInclude, null);
                 showDataCount(dataSet_non_vegetarian_byAge[i]);
             }
 
             initializeTestList();
 
             repeat = 100;
-            basefolder = $@"D:\GI Data\result\";
+            basefolder = $@"D:\GI Data\result __";
             OddsRatioTable.clear();
             OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table.txt");
 
-            DoTestAndWriteResult(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
+            DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
 
             for (int i = 0; i < dataSet_vegetarian_byAge.Length; i++)
             {
-                DoTestAndWriteResult(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
+                DoTestAndWriteResultAllTest(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
             }
 
             OddsRatioTable.writeToFile();
 
 
         }
-        static void DoTestAndWriteResult(DataSet primary, DataSet match, string studyGroup)
+        static void DoTestAndWriteResultAllTest(DataSet primary, DataSet match, string studyGroup)
         {
-            foreach (var fieldnameSet in testList)
+            foreach (var fieldnameSetList in testList)
             {
-                DoTestAndWriteResult(fieldnameSet, primary, match, studyGroup);
+                DoTestAndWriteResult(fieldnameSetList, primary, match, studyGroup);
             }
         }
-        static void DoTestAndWriteResult(FieldNameToTest fieldnameSet, DataSet primary, DataSet match, string studyGroup)
+        static void DoTestAndWriteResult(List<FieldNameToTest> fieldnameSetList, DataSet primary, DataSet match, string studyGroup)
         {
             int matchcount = 1;
             if (match.dataRow.Count / primary.dataRow.Count > 12)
@@ -134,25 +174,59 @@ namespace GI_STUDY
             {
                 matchcount = 2;
             }
-            
-            var s = MatchAndCalculateChiSquare($"{studyGroup} on {fieldnameSet.fieldname}", repeat, primary, match, matchcount, fieldnameSet.fieldname, fieldnameSet.positiveValue);
+
+            var s = MatchAndCalculateChiSquare($"{studyGroup} on {fieldnameSetList[0].fieldname}", repeat, primary, match, matchcount, fieldnameSetList);
             string folder = basefolder + $@"\{studyGroup}";
-            writeResult(s, folder, $"{fieldnameSet.fieldname}({fieldnameSet.info}).txt");
+            writeResult(s, folder, $"{fieldnameSetList[0].fieldname}({fieldnameSetList[0].info}).txt");
         }
-        static List<FieldNameToTest> testList;
+        static List<List<FieldNameToTest>> testList;
         static void initializeTestList()
         {
-            testList = new List<FieldNameToTest>();
-            testList.Add(new FieldNameToTest("PS04", "1", "是否曾有其他過敏性疾病"));
-            testList.Add(new FieldNameToTest("PS04_1", "1", "過敏性鼻炎"));
-            testList.Add(new FieldNameToTest("PS04_2", "1", "氣喘"));
-            testList.Add(new FieldNameToTest("PS04_3", "1", "異位性皮膚炎"));
-            testList.Add(new FieldNameToTest("PS04_4", "1", "蕁麻疹"));
-            testList.Add(new FieldNameToTest("FS01", "1", "是否可能發生過食物過敏"));
-            testList.Add(new FieldNameToTest("FS05", "1", "是否知道對何種食物過敏"));
-            testList.Add(new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏"));
-            testList.Add(new FieldNameToTest("FS13", "1", "對蛋過敏"));
-            testList.Add(new FieldNameToTest("FS15", "1", "對奶過敏"));
+            testList = new List<List<FieldNameToTest>>();
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("PS04", "1", "是否曾有其他過敏性疾病") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("PS04_1", "1", "過敏性鼻炎") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("PS04_2", "1", "氣喘") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("PS04_3", "1", "異位性皮膚炎") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("PS04_4", "1", "蕁麻疹") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("FS01", "1", "是否可能發生過食物過敏") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("FS05", "1", "是否知道對何種食物過敏") });
+            testList.Add(new List<FieldNameToTest>() { new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏") });
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS06", "1", "有殼海鮮過敏"),
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS07", "1", "魚類過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS08", "1", "肉類過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS09", "1", "蔬菜過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS10", "1", "水果過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS11", "1", "堅果過敏"),
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS12", "1", "花生過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS13", "1", "對蛋過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS14", "1", "麥類過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS15", "1", "對奶過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS16", "1", "黃豆過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS19", "1", "酒類過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
         }
 
         static void writeResult(string result, string folder, string filename)
@@ -164,16 +238,11 @@ namespace GI_STUDY
             sw.Write(result);
             sw.Close();
         }
+
         static string MatchAndCalculateChiSquare(string name, int repeat, DataSet Primary, DataSet Match, int matchCount,
-           string CalculateField, string fieldPostiveCriteria)
+            List<FieldNameToTest> CalculateField)
         {
-            return MatchAndCalculateChiSquare(name, repeat, Primary, Match, matchCount,
-             CalculateField, fieldPostiveCriteria, "");
-        }
-        static string MatchAndCalculateChiSquare(string name, int repeat, DataSet Primary, DataSet Match, int matchCount,
-            string CalculateField, string fieldPostiveCriteria, string Result)
-        {
-            StringBuilder result = new StringBuilder(Result);
+            StringBuilder result = new StringBuilder();
             int primaryMore = 0, matchMore = 0;
             int succussefulMatch = 0;
             for (int i = 0; i < repeat; i++)
@@ -186,8 +255,8 @@ namespace GI_STUDY
                 dataMatcher.setMatchData(Match);
                 List<RowMatchPool> matchPools = dataMatcher.matchIntoPools();
                 SampleRandomizely.sampleTheMatchList(matchPools, matchCount);
-                ChiSquareCalculator chiSquare = new ChiSquareCalculator(Primary.getIndex(CalculateField), fieldPostiveCriteria, matchPools);
-                chiSquare.calculate();
+                ChiSquareCalculator chiSquare = new ChiSquareCalculator(CalculateField, matchPools);
+                chiSquare.countPosAndNegInBothGroup();
                 result.AppendLine($"Test #{i + 1}");
                 result.AppendLine(ChiSquareCalculator.printTitle());
                 result.Append(chiSquare.printResult(ref primaryMore, ref matchMore, name));

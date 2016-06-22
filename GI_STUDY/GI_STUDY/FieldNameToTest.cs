@@ -8,10 +8,17 @@ namespace GI_STUDY
 {
     class FieldNameToTest
     {
-       public  string fieldname, positiveValue, info;
+        static public Dictionary<string, int> index = new Dictionary<string, int>();
+        static int getIndex(string lookUpString)
+        {
+            return index[lookUpString];
+        }
+        public string fieldname, positiveValue, info;
+        public int fieldindex;
         public FieldNameToTest(string fieldname, string positiveValue, string info)
         {
             this.fieldname = fieldname;
+            this.fieldindex = getIndex(fieldname);
             this.positiveValue = positiveValue;
             this.info = info;
         }
