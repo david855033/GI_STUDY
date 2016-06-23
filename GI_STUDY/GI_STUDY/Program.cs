@@ -19,16 +19,130 @@ namespace GI_STUDY
             Console.SetError(streamwriter);
             Console.WriteLine($"Execution log======================{DateTime.Now}");
             study();
-            Console.WriteLine(".");
-            Console.WriteLine(".");
-            Console.WriteLine(".");
-            Console.WriteLine("End of Program. Press Any Key To Exit.");
+            CountWork();
+            Console.WriteLine($"End at{DateTime.Now}======================");
         }
         static string basefolder;
         static int repeat;
-        static void study()
+
+        static void countVegetarianSubGroup(DataSet Input, List<Criteria> AdditionalCriteriaList, string name)
         {
-            //breast feed group PS01=1, non breast feed PS01=0
+            DataSet dataSet_forCount;
+            Console.WriteLine($"*****   [{name}] -- Vegetration Subgroup    *****");
+            DataSet Preselected = Input.select(null, null);
+            foreach (var criteria in AdditionalCriteriaList)
+            {
+                List<Criteria> List = new List<Criteria>() { criteria };
+                Preselected = Preselected.select(List, null);
+            }
+
+            List<Criteria> EggMilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "2"),
+            };
+            Console.WriteLine("select EggMilkVeg...");
+            dataSet_forCount = Preselected.select(EggMilkVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> EggVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "3"),
+            };
+            Console.WriteLine("select EggVeg...");
+            dataSet_forCount = Preselected.select(EggVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
+            List<Criteria> MilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "4"),
+            };
+            Console.WriteLine("select MilkVeg...");
+            dataSet_forCount = Preselected.select(MilkVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> AllVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "5"),
+            };
+            Console.WriteLine("select AllVeg...");
+            dataSet_forCount = Preselected.select(AllVeg_toInclude, null);
+            showDataCount(dataSet_forCount);
+        }
+        static void countFoodAllergySubGroup(DataSet Input, List<Criteria> AdditionalCriteriaList, string name)
+        {
+            DataSet dataSet_forCount;
+            Console.WriteLine($"*****   [{name}] -- Food Allergy SubGroup     *****");
+            DataSet Preselected = Input.select(null, null);
+            foreach (var criteria in AdditionalCriteriaList)
+            {
+                List<Criteria> List = new List<Criteria>() { criteria };
+                Preselected = Preselected.select(List, null);
+            }
+
+            List<Criteria> HistoryTaking_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS22_1", "1"),
+            };
+            Console.WriteLine("select HistoryTaking...");
+            dataSet_forCount = Preselected.select(HistoryTaking_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> SkinTest_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS22_2", "1"),
+            };
+            Console.WriteLine("select SkinTest...");
+            dataSet_forCount = Preselected.select(SkinTest_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
+            List<Criteria> BloodTest_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS22_3", "1"),
+            };
+            Console.WriteLine("select BloodTest...");
+            dataSet_forCount = Preselected.select(BloodTest_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
+            List<Criteria> FoodChallenge_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS22_4", "1"),
+            };
+            Console.WriteLine("select FoodChallenge...");
+            dataSet_forCount = Preselected.select(FoodChallenge_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> NoTreat_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS23_1", "1"),
+            };
+            Console.WriteLine("select NoTreat...");
+            dataSet_forCount = Preselected.select(NoTreat_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> DietControl_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS23_2", "1"),
+            };
+            Console.WriteLine("select DietControl...");
+            dataSet_forCount = Preselected.select(DietControl_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+            List<Criteria> SeekDoctor_toInclude = new List<Criteria>()
+            {
+                new Criteria("FS23_3", "1"),
+            };
+            Console.WriteLine("select SeekDoctor...");
+            dataSet_forCount = Preselected.select(NoTreat_toInclude, null);
+            showDataCount(dataSet_forCount);
+
+
+        }
+
+        static void CountWork()
+        {
             DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
             showDataCount(originDataSet);
             Criteria.index = originDataSet.index;
@@ -60,48 +174,79 @@ namespace GI_STUDY
                 new Criteria("PS03", "5")
             };
 
-            DataSet dataSet_forCount;
+            Console.WriteLine("select Vegetarian...");
+            DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
+            showDataCount(dataSet_vegetarian);
 
-            List<Criteria> EggMilkVeg_toInclude = new List<Criteria>()
-            {
-                new Criteria("PS03", "2")
+            countVegetarianSubGroup(dataSet_vegetarian, new List<Criteria>() { new Criteria("PS04_2", "1") }, "氣喘");
+            countVegetarianSubGroup(dataSet_vegetarian, new List<Criteria>() { new Criteria("PS04_1", "1") }, "Allergic Rhinitis");
+            countVegetarianSubGroup(dataSet_vegetarian, new List<Criteria>() { new Criteria("PS04_3", "1") }, "Atopic Dermatitis");
+            countVegetarianSubGroup(dataSet_vegetarian, new List<Criteria>() { new Criteria("PS04_4", "1") }, "Urticaria");
+
+            var doctorDiagnosedFoodAllergy = new Criteria("FS21", "1");
+
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS21", "1"), doctorDiagnosedFoodAllergy }, "Any of food allergy");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS07", "1"), doctorDiagnosedFoodAllergy }, "魚類過敏");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS12", "1"), doctorDiagnosedFoodAllergy }, "花生過敏");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS13", "1"), doctorDiagnosedFoodAllergy }, "對蛋過敏");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS13_01", "1"), doctorDiagnosedFoodAllergy }, "對蛋白過敏");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS13_02", "1"), doctorDiagnosedFoodAllergy }, "對蛋黃過敏");
+            countVegetarianSubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS15", "1"), doctorDiagnosedFoodAllergy }, "對奶過敏");
+
+            countFoodAllergySubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS21", "1"), doctorDiagnosedFoodAllergy }, "Any of food allergy");
+            countFoodAllergySubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS07", "1"), doctorDiagnosedFoodAllergy }, "魚類過敏");
+            countFoodAllergySubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS12", "1"), doctorDiagnosedFoodAllergy }, "花生過敏");
+            countFoodAllergySubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS13", "1"), doctorDiagnosedFoodAllergy }, "對蛋過敏");
+            countFoodAllergySubGroup(dataSet_vegetarian,
+                new List<Criteria>() { new Criteria("FS15", "1"), doctorDiagnosedFoodAllergy }, "對奶過敏");
+        }
+
+        static void study()
+        {
+            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
+            showDataCount(originDataSet);
+            Criteria.index = originDataSet.index;
+            FieldNameToTest.index = originDataSet.index;
+
+            Console.WriteLine("remove data without CASESEX and AGE data...");
+            List<Criteria> BadData_toExclude = new List<Criteria>()  {
+                new Criteria("CASESEX", "") ,
+                new Criteria("AGE", "9999")
             };
-            Console.WriteLine("select EggMilkVeg...");
-            dataSet_forCount = DataSets_Children.select(EggMilkVeg_toInclude, null);
-            showDataCount(dataSet_forCount);
+            DataSet dataSet_removeNoAgeOrNoSex = originDataSet.select(null, BadData_toExclude);
+            showDataCount(dataSet_removeNoAgeOrNoSex);
 
-            List<Criteria> EggVeg_toInclude = new List<Criteria>()
+            Console.WriteLine("select Children...");
+            DataSet DataSets_Children = new DataSet();
+            for (int i = 0; i < 7; i++)
             {
-                new Criteria("PS03", "3")
-            };
-            Console.WriteLine("select EggVeg...");
-            dataSet_forCount = DataSets_Children.select(EggVeg_toInclude, null);
-            showDataCount(dataSet_forCount);
+                List<Criteria> ageGroupToInclude = new List<Criteria>() {
+                    new Criteria("AGEGROUP", (i + 1).ToString())
+                };
+                DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(ageGroupToInclude, null));
+            }
+            showDataCount(DataSets_Children);
 
-
-            List<Criteria> MilkVeg_toInclude = new List<Criteria>()
-            {
-                new Criteria("PS03", "4")
-            };
-            Console.WriteLine("select MilkVeg...");
-            dataSet_forCount = DataSets_Children.select(MilkVeg_toInclude, null);
-            showDataCount(dataSet_forCount);
-
-            List<Criteria> AllVeg_toInclude = new List<Criteria>()
-            {
+            List<Criteria> Vegetarian_toInclude = new List<Criteria>()  {
+                new Criteria("PS03", "2") ,
+                new Criteria("PS03", "3") ,
+                new Criteria("PS03", "4") ,
                 new Criteria("PS03", "5")
             };
-            Console.WriteLine("select AllVeg...");
-            dataSet_forCount = DataSets_Children.select(AllVeg_toInclude, null);
-            showDataCount(dataSet_forCount);
-
 
             List<Criteria> non_Vegetarian_toInclude = new List<Criteria>()  {
                 new Criteria("PS03", "1")
-            };
-
-            List<Criteria> DoctorFoodAllergy_toInclude = new List<Criteria>()  {
-                new Criteria("FS21", "1")
             };
 
             Console.WriteLine("select Vegetarian...");
@@ -147,9 +292,12 @@ namespace GI_STUDY
             }
 
             OddsRatioTable.writeToFile();
-
-
         }
+
+
+
+
+
         static void DoTestAndWriteResultAllTest(DataSet primary, DataSet match, string studyGroup)
         {
             foreach (var fieldnameSetList in testList)
@@ -214,6 +362,12 @@ namespace GI_STUDY
                 new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
             testList.Add(new List<FieldNameToTest>() {
                 new FieldNameToTest("FS13", "1", "對蛋過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS13_01", "1", "對蛋白過敏") ,
+                new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
+            testList.Add(new List<FieldNameToTest>() {
+                new FieldNameToTest("FS13_02", "1", "對蛋黃過敏") ,
                 new FieldNameToTest("FS21", "1", "請問是否曾求醫，檢查確定是上述食物過敏")});
             testList.Add(new List<FieldNameToTest>() {
                 new FieldNameToTest("FS14", "1", "麥類過敏") ,
@@ -293,7 +447,7 @@ namespace GI_STUDY
                      where q[input.getIndex("CASESEX")] == "0"
                      select q).Count();
 
-            Console.WriteLine($">>data count: {input.dataRow.Count}  M:{M } F:{F}");
+            Console.WriteLine($">>data count: {input.dataRow.Count}  M:{M } F:{F}\r\n");
         }
         static void initializeDataSetArray(DataSet[] array)
         {
