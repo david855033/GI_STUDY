@@ -11,10 +11,8 @@ namespace GI_STUDY
         static public DataSet joinData(this DataSet originDataSet, DataSet joinDataSet)
         {
             DataSet destineDataSet = new DataSet();
-            foreach (var i in joinDataSet.index)
-            {
-                destineDataSet.index.Add(i.Key, i.Value);
-            }
+            destineDataSet.copyIndexFromDataSet(originDataSet);
+
             foreach (var row in originDataSet.dataRow)
             {
                 destineDataSet.addDataRow(row);

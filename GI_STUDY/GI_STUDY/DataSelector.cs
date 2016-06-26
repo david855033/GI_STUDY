@@ -19,10 +19,22 @@ namespace GI_STUDY
                 {
                     foreach (var c in includeCriteria)
                     {
-                        if (row[c.fieldIndex] == c.shouldEqual)
+                        if (c.shouldEqual.EndsWith("*"))
                         {
-                            isMatched = true;
-                            continue;
+                            string shouldEqual = c.shouldEqual.TrimEnd('*');
+                            if (row[c.fieldIndex].StartsWith(shouldEqual))
+                            {
+                                isMatched = true;
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            if (row[c.fieldIndex] == c.shouldEqual)
+                            {
+                                isMatched = true;
+                                continue;
+                            }
                         }
                     }
                 }
@@ -36,10 +48,22 @@ namespace GI_STUDY
                     {
                         foreach (var c in excludeCriteria)
                         {
-                            if (row[c.fieldIndex] == c.shouldEqual)
+                            if (c.shouldEqual.EndsWith("*"))
                             {
-                                isMatched = false;
-                                continue;
+                                string shouldEqual = c.shouldEqual.TrimEnd('*');
+                                if (row[c.fieldIndex].StartsWith(shouldEqual))
+                                {
+                                    isMatched = false;
+                                    continue;
+                                }
+                            }
+                            else
+                            {
+                                if (row[c.fieldIndex] == c.shouldEqual)
+                                {
+                                    isMatched = false;
+                                    continue;
+                                }
                             }
                         }
                     }

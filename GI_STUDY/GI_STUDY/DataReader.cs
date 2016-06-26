@@ -9,6 +9,21 @@ namespace GI_STUDY
 {
     static class DataReader
     {
+        public static DataSet LoadData(IEnumerable<string> paths)
+        {
+            DataSet FinaldataSet = new DataSet();
+            foreach (var s in paths)
+            {
+                var data = LoadData(s);
+                if (FinaldataSet.index == null)
+                {
+                    FinaldataSet.copyIndexFromDataSet(data);
+                }
+                FinaldataSet.joinData(data);
+            }
+            return FinaldataSet;
+        }
+
         public static DataSet LoadData(string path)
         {
             Console.WriteLine($"Loading data from {path}");
