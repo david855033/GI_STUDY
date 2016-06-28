@@ -9,7 +9,7 @@ namespace GI_STUDY
 {
     class DataSet
     {
-        public Dictionary<string, int> index;
+        public Dictionary<string, int> index = new Dictionary<string, int>();
         public List<string[]> dataRow = new List<string[]>();
         public DataSet()
         {

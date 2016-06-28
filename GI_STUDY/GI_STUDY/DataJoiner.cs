@@ -11,7 +11,14 @@ namespace GI_STUDY
         static public DataSet joinData(this DataSet originDataSet, DataSet joinDataSet)
         {
             DataSet destineDataSet = new DataSet();
-            destineDataSet.copyIndexFromDataSet(originDataSet);
+            if (originDataSet.index.Count > 0)
+            {
+                destineDataSet.copyIndexFromDataSet(originDataSet);
+            }
+            else
+            {
+                destineDataSet.copyIndexFromDataSet(joinDataSet);
+            }
 
             foreach (var row in originDataSet.dataRow)
             {

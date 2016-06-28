@@ -229,6 +229,7 @@ namespace GI_STUDY
 
             Console.WriteLine("select Children...");
             DataSet DataSets_Children = new DataSet();
+            DataSets_Children.copyIndexFromDataSet(originDataSet);
             for (int i = 0; i < 7; i++)
             {
                 List<Criteria> ageGroupToInclude = new List<Criteria>() {
@@ -249,6 +250,27 @@ namespace GI_STUDY
                 new Criteria("PS03", "1")
             };
 
+            List<Criteria> EggMilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "2") ,
+            };
+
+            List<Criteria> EggVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "3") ,
+            };
+
+            List<Criteria> MilkVeg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "4") ,
+            };
+
+            List<Criteria> Pure_Veg_toInclude = new List<Criteria>()
+            {
+                new Criteria("PS03", "5") ,
+            };
+
+
             Console.WriteLine("select Vegetarian...");
             DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
             showDataCount(dataSet_vegetarian);
@@ -257,45 +279,64 @@ namespace GI_STUDY
             DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
             showDataCount(dataSet_non_vegetarian);
 
-            int agegroups = 7;
-            int firstAgeGroup = 1;
-            DataSet[] dataSet_vegetarian_byAge = new DataSet[agegroups];
-            DataSet[] dataSet_non_vegetarian_byAge = new DataSet[agegroups];
-            for (int i = 0; i < agegroups; i++)
-            {
-                var AgeToInclude = new List<Criteria>()
-                {
-                    new Criteria("AGEGROUP", (i + firstAgeGroup).ToString())
-                };
+            Console.WriteLine("select Egg-Milk-Vegetarian...");
+            DataSet dataSet_Egg_Milk_vegetarian = DataSets_Children.select(EggMilkVeg_toInclude, null);
+            showDataCount(dataSet_Egg_Milk_vegetarian);
 
-                Console.WriteLine($"select Vegetarian. age group{i + 1}");
-                dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(AgeToInclude, null);
-                showDataCount(dataSet_vegetarian_byAge[i]);
+            Console.WriteLine("select Egg-Vegetarian...");
+            DataSet dataSet_Egg_vegetarian = DataSets_Children.select(EggVeg_toInclude, null);
+            showDataCount(dataSet_Egg_vegetarian);
 
-                Console.WriteLine($"select non-Vegetarian. age group{i + 1}");
-                dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(AgeToInclude, null);
-                showDataCount(dataSet_non_vegetarian_byAge[i]);
-            }
+            Console.WriteLine("select Milk-Vegetarian...");
+            DataSet dataSet_Milk_vegetarian = DataSets_Children.select(MilkVeg_toInclude, null);
+            showDataCount(dataSet_Milk_vegetarian);
+
+            Console.WriteLine("select Pure-Vegetarian...");
+            DataSet dataSet_pure_vegetarian = DataSets_Children.select(Pure_Veg_toInclude, null);
+            showDataCount(dataSet_pure_vegetarian);
+
+            //int agegroups = 7;
+            //int firstAgeGroup = 1;
+            //DataSet[] dataSet_vegetarian_byAge = new DataSet[agegroups];
+            //DataSet[] dataSet_non_vegetarian_byAge = new DataSet[agegroups];
+            //for (int i = 0; i < agegroups; i++)
+            //{
+            //    var AgeToInclude = new List<Criteria>()
+            //    {
+            //        new Criteria("AGEGROUP", (i + firstAgeGroup).ToString())
+            //    };
+
+            //    Console.WriteLine($"select Vegetarian. age group{i + 1}");
+            //    dataSet_vegetarian_byAge[i] = dataSet_vegetarian.select(AgeToInclude, null);
+            //    showDataCount(dataSet_vegetarian_byAge[i]);
+
+            //    Console.WriteLine($"select non-Vegetarian. age group{i + 1}");
+            //    dataSet_non_vegetarian_byAge[i] = dataSet_non_vegetarian.select(AgeToInclude, null);
+            //    showDataCount(dataSet_non_vegetarian_byAge[i]);
+            //}
 
             initializeTestList();
 
             repeat = 100;
-            basefolder = $@"D:\GI Data\result __";
+            basefolder = $@"D:\GI Data\result Veg Subgrouping";
             OddsRatioTable.clear();
             OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table.txt");
 
             DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
+            
+            
+            DoTestAndWriteResultAllTest(dataSet_Egg_Milk_vegetarian, dataSet_non_vegetarian, "EggMilkVeg vs NonVeg");
+            DoTestAndWriteResultAllTest(dataSet_Egg_vegetarian, dataSet_non_vegetarian, "EggVeg vs NonVeg");
+            DoTestAndWriteResultAllTest(dataSet_Milk_vegetarian, dataSet_non_vegetarian, "MilkVeg vs NonVeg");
+            DoTestAndWriteResultAllTest(dataSet_pure_vegetarian, dataSet_non_vegetarian, "PureVeg vs NonVeg");
 
-            for (int i = 0; i < dataSet_vegetarian_byAge.Length; i++)
-            {
-                DoTestAndWriteResultAllTest(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
-            }
+            //for (int i = 0; i < dataSet_vegetarian_byAge.Length; i++)
+            //{
+            //    DoTestAndWriteResultAllTest(dataSet_vegetarian_byAge[i], dataSet_non_vegetarian_byAge[i], $"Veg vs NonVeg _subgrouping by age {i + 1}");
+            //}
 
             OddsRatioTable.writeToFile();
         }
-
-
-
 
 
         static void DoTestAndWriteResultAllTest(DataSet primary, DataSet match, string studyGroup)
