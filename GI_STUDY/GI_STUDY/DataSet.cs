@@ -67,5 +67,53 @@ namespace GI_STUDY
                 sw.Write(Content);
             }
         }
+        public string outputByField(List<string> fields)
+        {
+            StringBuilder title = new StringBuilder();
+            List<string> toRemove = new List<string>();
+            foreach (var s in fields)
+            {
+                if (index.ContainsKey(s))
+                {
+                    title.Append(s + "\t");
+                }
+                else
+                {
+                    toRemove.Add(s);
+                }
+            }
+            fields.RemoveAll(x => toRemove.Contains(x));
+            List<int> indexs = new List<int>();
+            foreach (var s in fields)
+            {
+                indexs.Add(getIndex(s));
+            }
+            StringBuilder content = new StringBuilder();
+            content.AppendLine(title.ToString().Trim('\t'));
+            foreach (var row in dataRow)
+            {
+                StringBuilder line = new StringBuilder();
+                foreach (var i in indexs)
+                {
+                    line.Append(row[i] + "\t");
+                }
+                content.AppendLine(line.ToString().Trim('\t'));
+            }
+            return content.ToString();
+        }
+        public void addfield(IDaterConvertor dataConvertor, string fieldname)
+        {
+            if (index.ContainsKey(fieldname))
+                return;
+            index.Add(fieldname, dataRow.First().Count());
+            {
+
+            }
+        }
     }
+}
+
+interface IDaterConvertor
+{
+    string getFieldContent();
 }

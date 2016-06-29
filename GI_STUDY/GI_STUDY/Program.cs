@@ -8,7 +8,6 @@ namespace GI_STUDY
 {
     class Program
     {
-
         static void Main(string[] args)
         {
             //study_BreastFeeding_Atopic();
@@ -18,8 +17,9 @@ namespace GI_STUDY
             Console.SetOut(streamwriter);
             Console.SetError(streamwriter);
             Console.WriteLine($"Execution log======================{DateTime.Now}");
-            study();
-            CountWork();
+            LogisticRegressionOutPut();
+            //study();
+            //CountWork();
             Console.WriteLine($"End at{DateTime.Now}======================");
         }
         static string basefolder;
@@ -212,7 +212,41 @@ namespace GI_STUDY
                 new List<Criteria>() { new Criteria("FS15", "1"), doctorDiagnosedFoodAllergy }, "對奶過敏");
         }
 
-        static void study()
+        static void LogisticRegressionOutPut()
+        {
+            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
+            showDataCount(originDataSet);
+            Criteria.index = originDataSet.index;
+            FieldNameToTest.index = originDataSet.index;
+            Console.WriteLine("remove data without CASESEX and AGE data...");
+            List<Criteria> BadData_toExclude = new List<Criteria>()  {
+                new Criteria("CASESEX", "") ,
+                new Criteria("AGE", "9999")
+            };
+            DataSet dataSet_removeNoAgeOrNoSex = originDataSet.select(null, BadData_toExclude);
+            showDataCount(dataSet_removeNoAgeOrNoSex);
+
+            Console.WriteLine("select Children...");
+            DataSet DataSets_Children = new DataSet();
+            DataSets_Children.copyIndexFromDataSet(originDataSet);
+            for (int i = 0; i < 7; i++)
+            {
+                List<Criteria> ageGroupToInclude = new List<Criteria>() {
+                    new Criteria("AGEGROUP", (i + 1).ToString())
+                };
+                DataSets_Children = DataSets_Children.joinData(dataSet_removeNoAgeOrNoSex.select(ageGroupToInclude, null));
+            }
+            showDataCount(DataSets_Children);
+
+            List<string> outputFields = new List<string>()
+            {"CASESEX","AGEGROUP","PS03","PS04_2"};
+            var result = DataSets_Children.outputByField(outputFields);
+            using (var sw = new StreamWriter(@"D:\GI DATA\result of field selection.txt", false, Encoding.Default))
+            {
+                sw.Write(result);
+            }
+        }
+        static void study_RR()
         {
             DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
             showDataCount(originDataSet);
@@ -323,8 +357,8 @@ namespace GI_STUDY
             OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table.txt");
 
             DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
-            
-            
+
+
             DoTestAndWriteResultAllTest(dataSet_Egg_Milk_vegetarian, dataSet_non_vegetarian, "EggMilkVeg vs NonVeg");
             DoTestAndWriteResultAllTest(dataSet_Egg_vegetarian, dataSet_non_vegetarian, "EggVeg vs NonVeg");
             DoTestAndWriteResultAllTest(dataSet_Milk_vegetarian, dataSet_non_vegetarian, "MilkVeg vs NonVeg");
