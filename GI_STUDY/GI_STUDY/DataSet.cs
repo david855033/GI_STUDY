@@ -39,7 +39,6 @@ namespace GI_STUDY
         {
             dataRow.Add(line);
         }
-
         public int getIndex(string lookUpString)
         {
             return index[lookUpString];
@@ -101,19 +100,25 @@ namespace GI_STUDY
             }
             return content.ToString();
         }
-        public void addfield(IDaterConvertor dataConvertor, string fieldname)
+        public string addField(IDaterConvertor dataConvertor, string fieldname)
         {
             if (index.ContainsKey(fieldname))
-                return;
+                return fieldname;
             index.Add(fieldname, dataRow.First().Count());
+            List<string[]> newDataRow = new List<string[]>();
+            foreach (var row in dataRow)
             {
-
+                string[] newRow = new string[row.Length + 1];
+                for (int i = 0; i < row.Length; i++)
+                {
+                    newRow[i] = row[i];
+                }
+                newRow[newRow.Length - 1] = dataConvertor.getFieldContent(row, index);
+                newDataRow.Add(newRow);
             }
+            dataRow = newDataRow;
+            return fieldname;
         }
     }
 }
 
-interface IDaterConvertor
-{
-    string getFieldContent();
-}

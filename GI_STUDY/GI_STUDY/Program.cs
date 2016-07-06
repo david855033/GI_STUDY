@@ -17,8 +17,8 @@ namespace GI_STUDY
             Console.SetOut(streamwriter);
             Console.SetError(streamwriter);
             Console.WriteLine($"Execution log======================{DateTime.Now}");
-            LogisticRegressionOutPut();
-            //study();
+            //LogisticRegressionOutPut();
+            study_RR();
             //CountWork();
             Console.WriteLine($"End at{DateTime.Now}======================");
         }
@@ -238,8 +238,34 @@ namespace GI_STUDY
             }
             showDataCount(DataSets_Children);
 
-            List<string> outputFields = new List<string>()
-            {"CASESEX","AGEGROUP","PS03","PS04_2"};
+
+            List<string> outputFields = new List<string>() {"AGEGROUP" };
+            outputFields.Add(DataSets_Children.addField(new GenderDataConvertor(), "Gender"));
+
+            outputFields.Add(DataSets_Children.addField(new isVegetarianDataconvertor(), "Vegetarian"));
+            outputFields.Add(DataSets_Children.addField(new dietHabitDataConvertor(), "DietHabit"));
+
+            outputFields.Add(DataSets_Children.addField(new BinaryDataConvertor("PS04_1", "AllergicRhinitis"), "AllergicRhinitis"));
+            outputFields.Add(DataSets_Children.addField(new BinaryDataConvertor("PS04_2", "Ashtma"), "Asthma"));
+            outputFields.Add(DataSets_Children.addField(new BinaryDataConvertor("PS04_3", "AtopicDermatitis"), "AtopicDermatitis"));
+            outputFields.Add(DataSets_Children.addField(new BinaryDataConvertor("PS04_4", "Urticaria"), "Urticaria"));
+            outputFields.Add(DataSets_Children.addField(new BinaryDataConvertor("FS21", "FoodAllergy"), "FoodAllergy"));
+
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS06", "ShellFish"), "ShellFish"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS07", "Fish"), "Fish"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS08", "Meat"), "Meat"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS09", "Vegetable"), "Vegetable"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS10", "Fruit"), "Fruit"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS11", "Nuts"), "Nuts"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS12", "Peanut"), "Peanut"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS13", "Egg"), "Egg"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS14", "Wheat"), "Wheat"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS15", "Dairy"), "Dairy"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS16", "Soybean"), "Soybean"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS17", "BrinedMeat"), "BrinedMeat"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS18", "Seasoning"), "Seasoning"));
+            outputFields.Add(DataSets_Children.addField(new DoubleBinaryDataConvertor("FS21", "FS19", "Alcohol"), "Alcohol"));
+
             var result = DataSets_Children.outputByField(outputFields);
             using (var sw = new StreamWriter(@"D:\GI DATA\result of field selection.txt", false, Encoding.Default))
             {
@@ -354,7 +380,7 @@ namespace GI_STUDY
             repeat = 100;
             basefolder = $@"D:\GI Data\result Veg Subgrouping";
             OddsRatioTable.clear();
-            OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table.txt");
+            OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table match=4.txt");
 
             DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
 
@@ -397,7 +423,7 @@ namespace GI_STUDY
             {
                 matchcount = 2;
             }
-
+           // matchcount = 4;  //*******8
             var s = MatchAndCalculateChiSquare($"{studyGroup} on {fieldnameSetList[0].fieldname}", repeat, primary, match, matchcount, fieldnameSetList);
             string folder = basefolder + $@"\{studyGroup}";
             writeResult(s, folder, $"{fieldnameSetList[0].fieldname}({fieldnameSetList[0].info}).txt");
