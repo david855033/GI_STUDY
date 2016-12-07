@@ -45,6 +45,7 @@
   <ItemGroup>
     <Compile Include="ChiSquareCalculator.cs" />
     <Compile Include="Criteria.cs" />
+    <Compile Include="CriteriaListMatcher.cs" />
     <Compile Include="DataConverters.cs" />
     <Compile Include="DataSelector.cs" />
     <Compile Include="DataJoiner.cs" />

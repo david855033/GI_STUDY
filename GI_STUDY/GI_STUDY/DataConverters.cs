@@ -11,6 +11,14 @@ namespace GI_STUDY
         string getFieldContent(string[] row, Dictionary<string, int> index);
     }
 
+    class BlankDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            return "";
+        }
+    }
+
     class GenderDataConvertor : IDaterConvertor
     {
         public string getFieldContent(string[] row, Dictionary<string, int> index)
@@ -102,5 +110,60 @@ namespace GI_STUDY
             return "OtherDietHabit";
         }
     }
-
+    class FamilyIDDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(0, 9);
+        }
+    }
+    class LocationDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(0, 1);
+        }
+    }
+    class SchoolDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(1, 2);
+        }
+    }
+    class GenderConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(3, 1);
+        }
+    }
+    class GradeDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(4, 1);
+        }
+    }
+    class ClassDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(5, 2);
+        }
+    }
+    class FamilyMemberDataConvertor : IDaterConvertor
+    {
+        public string getFieldContent(string[] row, Dictionary<string, int> index)
+        {
+            string userID = row[index["USERID"]];
+            return userID.Substring(9, 1);
+        }
+    }
 }

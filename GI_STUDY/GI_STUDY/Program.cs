@@ -8,6 +8,8 @@ namespace GI_STUDY
 {
     class Program
     {
+       
+
         static void Main(string[] args)
         {
             //study_BreastFeeding_Atopic();
@@ -18,13 +20,123 @@ namespace GI_STUDY
             Console.SetError(streamwriter);
             Console.WriteLine($"Execution log======================{DateTime.Now}");
             //LogisticRegressionOutPut();
-            study_RR();
+            //study_RR();
             //CountWork();
+            study20161207();
             Console.WriteLine($"End at{DateTime.Now}======================");
         }
         static string basefolder;
         static int repeat;
 
+        static void study20161207()
+        {
+
+            //load data set
+            DataSet originDataSet = DataReader.LoadData(@"D:\GI DATA\FA_19609筆_修改 AGE GROUP_BREAST FEEDING.txt");
+            Console.WriteLine("Load Oringinal Data");
+            showDataCount(originDataSet);
+
+            //additional field proccess use dataConverter
+            originDataSet.addField(new FamilyIDDataConvertor(), "FamilyID");
+            originDataSet.addField(new LocationDataConvertor(), "Location");
+            originDataSet.addField(new SchoolDataConvertor(), "School");
+            originDataSet.addField(new GenderConvertor(), "Gender");
+            originDataSet.addField(new GradeDataConvertor(), "Grade");
+            originDataSet.addField(new ClassDataConvertor(), " Class");
+            originDataSet.addField(new FamilyMemberDataConvertor(), "FamilyMemberType");
+            originDataSet.addField(new BlankDataConvertor(), "FatherIndex");
+            originDataSet.addField(new BlankDataConvertor(), "MotherIndex");
+            originDataSet.addField(new BlankDataConvertor(), "ParentVegetarian");
+            originDataSet.addField(new BlankDataConvertor(), "ParentAsthma");
+            
+            //fill index to static classes
+            Criteria.index = originDataSet.index;
+            FieldNameToTest.index = originDataSet.index;
+
+            //initialize criterias
+            #region criterias
+             List<Criteria> HasGenderData = new List<Criteria>()  {
+                new Criteria("Gender", "0"),
+                new Criteria("Gender", "1"),
+            };
+
+             List<Criteria> NoAgeData = new List<Criteria>()  {
+                new Criteria("AGE", "9999")
+            };
+
+             List<Criteria> isChild_toInclude =
+                new List<Criteria>() { new Criteria("FamilyMemberType", "1") };
+             List<Criteria> hasFather_toExclude =
+                new List<Criteria>() { new Criteria("FatherIndex", "") };
+             List<Criteria> hasMother_toExclude =
+                new List<Criteria>() { new Criteria("MotherIndex", "") };
+             List<Criteria> hasBothParent_toExclude =
+                new List<Criteria>() { new Criteria("FatherIndex", ""), new Criteria("MotherIndex", "") };
+
+             List<Criteria> Vegetarian_toInclude = new List<Criteria>()  {
+                new Criteria("PS03", "2") ,
+                new Criteria("PS03", "3") ,
+                new Criteria("PS03", "4") ,
+                new Criteria("PS03", "5")
+            };
+            #endregion
+
+            DataSet processDataSet;
+
+            Console.WriteLine("remove data without Gender");
+            processDataSet = originDataSet.select(HasGenderData, null);
+            showDataCount(processDataSet);
+
+            Console.WriteLine("remove data without AGE");
+            processDataSet = processDataSet.select(null, NoAgeData);
+            showDataCount(processDataSet);
+
+            //在學生資料內加入父母的index
+            foreach (var thisRow in processDataSet.dataRow)
+            {
+                int familyMemberTypeFieldIndex = originDataSet.getIndex("FamilyMemberType");
+                int familyIDFieldIndex = originDataSet.getIndex("FamilyID");
+                int fatherFieledIndex = originDataSet.getIndex("FatherIndex");
+                int motherFieledIndex = originDataSet.getIndex("MotherIndex");
+                int parentVegetarian = originDataSet.getIndex("ParentVegetarian");
+                int parentAsthma = originDataSet.getIndex("ParentAsthma");
+                string thisFamilyID = thisRow[familyIDFieldIndex];
+                if (thisRow[familyMemberTypeFieldIndex] == "1")
+                {
+                    int indexOfFather =
+                        processDataSet.dataRow.FindIndex(
+                            x => x[familyIDFieldIndex] == thisFamilyID && x[familyMemberTypeFieldIndex] == "2");
+                    if (indexOfFather >= 0)
+                    {
+                        thisRow[fatherFieledIndex] = indexOfFather.ToString();
+                        string isFatherVegegarian = 
+                            processDataSet.dataRow[indexOfFather].matchAnyOfOne(Vegetarian_toInclude) ? "1" : "0";
+                        thisRow[parentVegetarian] = isFatherVegegarian;      
+                    }
+
+                    int indexOfMother =
+                        processDataSet.dataRow.FindIndex(
+                            x => x[familyIDFieldIndex] == thisFamilyID && x[familyMemberTypeFieldIndex] == "3");
+                    if (indexOfMother >= 0)
+                    {
+                        thisRow[motherFieledIndex] = indexOfMother.ToString();
+                        string isMotherVegegarian =
+                           processDataSet.dataRow[indexOfMother].matchAnyOfOne(Vegetarian_toInclude) ? "1" : "0";
+                        thisRow[parentVegetarian] = isMotherVegegarian;
+                    }
+                }
+            }
+
+            DataSet ChildDataSet = processDataSet.select(isChild_toInclude, null);
+            DataSet ChildWithFatherDataSet =
+                ChildDataSet.select(null, hasFather_toExclude);
+            DataSet ChildWithMotherDataSet =
+                ChildDataSet.select(null, hasMother_toExclude);
+            DataSet ChildWithBothParentsDataSet =
+                ChildDataSet.select(null, hasBothParent_toExclude);
+        }
+
+     
         static void countVegetarianSubGroup(DataSet Input, List<Criteria> AdditionalCriteriaList, string name)
         {
             DataSet dataSet_forCount;
@@ -239,7 +351,7 @@ namespace GI_STUDY
             showDataCount(DataSets_Children);
 
 
-            List<string> outputFields = new List<string>() {"AGEGROUP" };
+            List<string> outputFields = new List<string>() { "AGEGROUP" };
             outputFields.Add(DataSets_Children.addField(new GenderDataConvertor(), "Gender"));
 
             outputFields.Add(DataSets_Children.addField(new isVegetarianDataconvertor(), "Vegetarian"));
@@ -299,12 +411,7 @@ namespace GI_STUDY
             }
             showDataCount(DataSets_Children);
 
-            List<Criteria> Vegetarian_toInclude = new List<Criteria>()  {
-                new Criteria("PS03", "2") ,
-                new Criteria("PS03", "3") ,
-                new Criteria("PS03", "4") ,
-                new Criteria("PS03", "5")
-            };
+
 
             List<Criteria> non_Vegetarian_toInclude = new List<Criteria>()  {
                 new Criteria("PS03", "1")
@@ -331,29 +438,29 @@ namespace GI_STUDY
             };
 
 
-            Console.WriteLine("select Vegetarian...");
-            DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
-            showDataCount(dataSet_vegetarian);
+            //Console.WriteLine("select Vegetarian...");
+            //DataSet dataSet_vegetarian = DataSets_Children.select(Vegetarian_toInclude, null);
+            //showDataCount(dataSet_vegetarian);
 
-            Console.WriteLine("select non-Vegetarian...");
-            DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
-            showDataCount(dataSet_non_vegetarian);
+            //Console.WriteLine("select non-Vegetarian...");
+            //DataSet dataSet_non_vegetarian = DataSets_Children.select(non_Vegetarian_toInclude, null);
+            //showDataCount(dataSet_non_vegetarian);
 
-            Console.WriteLine("select Egg-Milk-Vegetarian...");
-            DataSet dataSet_Egg_Milk_vegetarian = DataSets_Children.select(EggMilkVeg_toInclude, null);
-            showDataCount(dataSet_Egg_Milk_vegetarian);
+            //Console.WriteLine("select Egg-Milk-Vegetarian...");
+            //DataSet dataSet_Egg_Milk_vegetarian = DataSets_Children.select(EggMilkVeg_toInclude, null);
+            //showDataCount(dataSet_Egg_Milk_vegetarian);
 
-            Console.WriteLine("select Egg-Vegetarian...");
-            DataSet dataSet_Egg_vegetarian = DataSets_Children.select(EggVeg_toInclude, null);
-            showDataCount(dataSet_Egg_vegetarian);
+            //Console.WriteLine("select Egg-Vegetarian...");
+            //DataSet dataSet_Egg_vegetarian = DataSets_Children.select(EggVeg_toInclude, null);
+            //showDataCount(dataSet_Egg_vegetarian);
 
-            Console.WriteLine("select Milk-Vegetarian...");
-            DataSet dataSet_Milk_vegetarian = DataSets_Children.select(MilkVeg_toInclude, null);
-            showDataCount(dataSet_Milk_vegetarian);
+            //Console.WriteLine("select Milk-Vegetarian...");
+            //DataSet dataSet_Milk_vegetarian = DataSets_Children.select(MilkVeg_toInclude, null);
+            //showDataCount(dataSet_Milk_vegetarian);
 
-            Console.WriteLine("select Pure-Vegetarian...");
-            DataSet dataSet_pure_vegetarian = DataSets_Children.select(Pure_Veg_toInclude, null);
-            showDataCount(dataSet_pure_vegetarian);
+            //Console.WriteLine("select Pure-Vegetarian...");
+            //DataSet dataSet_pure_vegetarian = DataSets_Children.select(Pure_Veg_toInclude, null);
+            //showDataCount(dataSet_pure_vegetarian);
 
             //int agegroups = 7;
             //int firstAgeGroup = 1;
@@ -375,20 +482,20 @@ namespace GI_STUDY
             //    showDataCount(dataSet_non_vegetarian_byAge[i]);
             //}
 
-            initializeTestList();
+            //initializeTestList();
 
-            repeat = 100;
-            basefolder = $@"D:\GI Data\result Veg Subgrouping";
-            OddsRatioTable.clear();
-            OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table match=4.txt");
+            //repeat = 100;
+            //basefolder = $@"D:\GI Data\result Veg Subgrouping";
+            //OddsRatioTable.clear();
+            //OddsRatioTable.setPath(basefolder + $@"\Odd Ratio Table match=4.txt");
 
-            DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
+            //DoTestAndWriteResultAllTest(dataSet_vegetarian, dataSet_non_vegetarian, "Veg vs NonVeg");
 
 
-            DoTestAndWriteResultAllTest(dataSet_Egg_Milk_vegetarian, dataSet_non_vegetarian, "EggMilkVeg vs NonVeg");
-            DoTestAndWriteResultAllTest(dataSet_Egg_vegetarian, dataSet_non_vegetarian, "EggVeg vs NonVeg");
-            DoTestAndWriteResultAllTest(dataSet_Milk_vegetarian, dataSet_non_vegetarian, "MilkVeg vs NonVeg");
-            DoTestAndWriteResultAllTest(dataSet_pure_vegetarian, dataSet_non_vegetarian, "PureVeg vs NonVeg");
+            //DoTestAndWriteResultAllTest(dataSet_Egg_Milk_vegetarian, dataSet_non_vegetarian, "EggMilkVeg vs NonVeg");
+            //DoTestAndWriteResultAllTest(dataSet_Egg_vegetarian, dataSet_non_vegetarian, "EggVeg vs NonVeg");
+            //DoTestAndWriteResultAllTest(dataSet_Milk_vegetarian, dataSet_non_vegetarian, "MilkVeg vs NonVeg");
+            //DoTestAndWriteResultAllTest(dataSet_pure_vegetarian, dataSet_non_vegetarian, "PureVeg vs NonVeg");
 
             //for (int i = 0; i < dataSet_vegetarian_byAge.Length; i++)
             //{
@@ -423,7 +530,7 @@ namespace GI_STUDY
             {
                 matchcount = 2;
             }
-           // matchcount = 4;  //*******8
+            // matchcount = 4;  //*******8
             var s = MatchAndCalculateChiSquare($"{studyGroup} on {fieldnameSetList[0].fieldname}", repeat, primary, match, matchcount, fieldnameSetList);
             string folder = basefolder + $@"\{studyGroup}";
             writeResult(s, folder, $"{fieldnameSetList[0].fieldname}({fieldnameSetList[0].info}).txt");
